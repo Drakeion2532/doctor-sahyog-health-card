@@ -16,6 +16,22 @@ Reference implementation of the research paper **"Doctor Sahyog: Health Card"** 
 |---|---|
 | ![](docs/doctor_record.png) | ![](docs/admin_audit.png) |
 
+## Patient Mitra: mobile app design (v2)
+
+**[Open the Patient Mitra design in Figma](https://www.figma.com/design/DWeRImWQq5nykh34RKDdlR/Patient-Mitra?node-id=0-1&p=f&t=kqAm0uMJkZbweJZd-0)**
+
+Patient Mitra is the second version of Doctor Sahyog, redesigned as a mobile app. The Figma file has about 115 screens (360 × 800) covering the full patient and doctor journeys:
+
+| Flow | Screens |
+|---|---|
+| Onboarding & auth | Start, Home, Patient / Doctor login & sign-up, Google / Facebook / Twitter login, forgot password, logout |
+| Patient | Dashboard & menu, Profile, My Doctor, Medical history, Prescriptions (view, type selection), Health blog |
+| Appointments | Search by doctor / by hospital, About doctor, Book & request appointment, Confirmation, My appointments |
+| Medicine ordering | Order medicine, Medicine catalogue, Cart, Checkout, Payment (UPI / G-Pay, net banking, card), Order confirmation, Track / cancel order |
+| Doctor | Doctor dashboard & menu, Patient search, Patient medical history, Write prescription and add to the patient's cart |
+
+This web app already implements the core of that design: patient and doctor portals, QR health card, patient search by ID, OPD history and prescriptions, and appointment booking. Medicine ordering, payments and the health blog are next on the roadmap.
+
 ## The problem
 
 In India, especially outside big cities, a patient's history lives in paper files and in their memory. In an emergency, a doctor doesn't know the blood group, allergies or current medication. A plain QR code that exposes everything would be a privacy disaster. This project gives **fast access with layered privacy**.
@@ -89,6 +105,7 @@ tests/             pytest suite
 
 ## Roadmap
 
+- [ ] Patient Mitra features from the Figma design: medicine ordering + order tracking, UPI payments, health blog, social login
 - [ ] FHIR R4 export (`Patient`, `Encounter`, `MedicationRequest`) for ABDM / ABHA interoperability
 - [ ] TOTP two-factor authentication for doctors
 - [ ] Lab-report uploads with malware scanning
