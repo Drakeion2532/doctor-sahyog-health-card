@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block body %}
+<div class="panel hero"><h1>One card. Your whole medical history.</h1>
+<p class="muted">A QR-code health card with a unique Patient ID. Doctors see your records instantly, paramedics see only emergency info, and you can see who accessed your data.</p>
+<a class="btn" href="{{ url_for('auth.register') }}">Get your health card</a> <a class="btn" href="{{ url_for('auth.login') }}">Login</a></div>
+<div class="grid">
+<div class="panel"><h3>For patients</h3><p>Printable card with QR code, PIN-protected history, appointment booking, full access log.</p></div>
+<div class="panel"><h3>For doctors</h3><p>Look up any patient by ID, read history, record OPD visits and prescriptions.</p></div>
+<div class="panel"><h3>Security</h3><p>Encrypted medical fields, signed and revocable QR codes, PIN lockout, verified doctors only, audit trail.</p></div>
+</div>{% endblock %}

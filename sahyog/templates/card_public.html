@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block body %}
+<div class="panel emergency"><h2>Emergency information</h2><div class="big">{{ p.user.name }}</div>
+<div class="grid"><div><b>Blood group</b><p class="big">{{ p.blood_group }}</p></div><div><b>Allergies</b><p>{{ p.allergies or 'None recorded' }}</p></div>
+<div><b>Chronic conditions</b><p>{{ p.chronic_conditions or 'None recorded' }}</p></div>
+<div><b>Emergency contact</b><p>{{ p.emergency_contact_name or '—' }}<br>{{ p.emergency_contact_phone or '' }}</p></div></div></div>
+{% if unlocked %}<div class="panel"><h2>Medical history</h2><p class="muted">Current medications: {{ p.current_medications or '—' }}</p>{% include "_visits.html" %}</div>
+{% elif locked %}<div class="panel"><p class="flash error">PIN entry locked for 15 minutes after repeated failures.</p></div>
+{% else %}<div class="panel"><h3>Card holder? Enter PIN for full history</h3><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input name="pin" type="password" inputmode="numeric" maxlength="6" required><button>Unlock</button></form></div>{% endif %}{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block body %}<div class="panel"><h2>Create account</h2><form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>I am a</label><select name="role"><option value="patient">Patient</option><option value="doctor">Doctor</option></select>
+<label>Full name</label><input name="name" required><label>Email</label><input name="email" type="email" required>
+<label>Password (8+ chars, letters and digits)</label><input name="password" type="password" required>
+<div class="grid"><div><h4>Patients</h4>
+<label>6-digit card PIN</label><input name="pin" inputmode="numeric" maxlength="6">
+<label>Date of birth</label><input name="dob" type="date"><label>Gender</label><select name="gender"><option>Female</option><option>Male</option><option>Other</option></select>
+<label>Blood group</label><select name="blood_group">{% for b in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}<option>{{b}}</option>{% endfor %}</select></div>
+<div><h4>Doctors</h4><label>Medical council registration no.</label><input name="registration_no">
+<label>Specialization</label><input name="specialization" placeholder="General Physician"></div></div>
+<button>Register</button></form></div>{% endblock %}

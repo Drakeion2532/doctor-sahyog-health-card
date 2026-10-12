@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Doctor Sahyog{% endblock %}</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><header><span class="logo">⚕ Doctor Sahyog</span><nav>
+{% if current_user.is_authenticated %}<span>{{ current_user.name }} ({{ current_user.role }})</span><a href="{{ url_for('auth.logout') }}">Logout</a>
+{% else %}<a href="{{ url_for('auth.login') }}">Login</a><a href="{{ url_for('auth.register') }}">Register</a>{% endif %}
+</nav></header><main>
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}<div class="flash {{c}}">{{m}}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}</main></body></html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block body %}
+<div class="grid"><div class="panel"><h2>My health card</h2><img class="card-img" src="{{ url_for('patient.card_png') }}" alt="health card">
+<p class="muted">Patient ID <b>{{ p.patient_id }}</b> · card v{{ p.card_version }}</p>
+<p class="muted">QR link: <code>{{ card_link }}</code></p>
+<form method="post" action="{{ url_for('patient.reissue') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary">Lost card? Reissue & revoke old QR</button></form></div>
+<div class="panel"><h2>Medical profile</h2><form method="post" action="{{ url_for('patient.update_profile') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Phone</label><input name="phone" value="{{ p.phone or '' }}"><label>Address</label><input name="address" value="{{ p.address or '' }}">
+<label>Allergies</label><input name="allergies" value="{{ p.allergies or '' }}"><label>Chronic conditions</label><input name="chronic_conditions" value="{{ p.chronic_conditions or '' }}">
+<label>Current medications</label><input name="current_medications" value="{{ p.current_medications or '' }}">
+<label>Emergency contact name</label><input name="emergency_contact_name" value="{{ p.emergency_contact_name or '' }}">
+<label>Emergency contact phone</label><input name="emergency_contact_phone" value="{{ p.emergency_contact_phone or '' }}">
+<button>Save</button></form></div></div>
+<div class="panel"><h2>OPD history</h2>{% include "_visits.html" %}</div>
+<div class="grid"><div class="panel"><h2>Book appointment</h2><form method="post" action="{{ url_for('patient.book') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Doctor</label><select name="doctor_id">{% for d in doctors %}<option value="{{d.id}}">Dr {{d.name}} – {{d.specialization}}</option>{% endfor %}</select>
+<label>Date & time</label><input name="slot" type="datetime-local" required><label>Reason</label><input name="reason"><button>Book</button></form>
+<table>{% for a in appts %}<tr><td>{{a.slot.replace('T',' ')}}</td><td>Dr {{a.doctor.name}}</td><td><span class="tag">{{a.status}}</span></td></tr>{% endfor %}</table></div>
+<div class="panel"><h2>Who accessed my data</h2><table><tr><th>When (UTC)</th><th>Who</th><th>Action</th></tr>
+{% for e in access %}<tr><td>{{ e.ts.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ e.actor }}</td><td><span class="tag {{ 'warn' if 'fail' in e.action }}">{{ e.action }}</span></td></tr>{% endfor %}</table></div></div>
+{% endblock %}

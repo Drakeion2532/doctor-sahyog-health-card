@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block body %}<div class="grid">
+<div class="panel"><h2>Doctors awaiting verification</h2><table>{% for d in pending %}<tr><td>Dr {{d.name}}<br><span class="muted">{{d.email}}</span></td><td>Reg. {{d.registration_no}}</td>
+<td><form method="post" action="{{ url_for('admin.verify', uid=d.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Verify</button></form></td></tr>{% else %}<tr><td class="muted">None pending.</td></tr>{% endfor %}</table></div>
+<div class="panel"><h2>Security events</h2><p class="big">{{ suspicious }}</p><p class="muted">failed logins, wrong PINs, revoked-card scans, invalid lookups</p></div></div>
+<div class="panel"><h2>Audit trail (latest 100)</h2><table><tr><th>Time (UTC)</th><th>Actor</th><th>Role</th><th>Action</th><th>Patient</th><th>IP</th><th>Detail</th></tr>
+{% for e in events %}<tr><td>{{ e.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{e.actor}}</td><td>{{e.actor_role}}</td><td><span class="tag {{ 'warn' if 'fail' in e.action or 'blocked' in e.action }}">{{e.action}}</span></td><td>{{e.patient_ref or ''}}</td><td>{{e.ip}}</td><td>{{e.detail}}</td></tr>{% endfor %}</table></div>{% endblock %}

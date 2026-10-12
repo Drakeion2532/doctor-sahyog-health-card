@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block body %}
+<div class="panel"><div class="big">{{ p.user.name }}</div><p class="muted">{{ p.patient_id }} · {{ p.gender }} · DOB {{ p.dob }} · Blood {{ p.blood_group }}</p>
+<div class="grid"><div><b>Allergies</b><p>{{ p.allergies or '—' }}</p></div><div><b>Chronic conditions</b><p>{{ p.chronic_conditions or '—' }}</p></div><div><b>Current medications</b><p>{{ p.current_medications or '—' }}</p></div></div></div>
+<div class="panel"><h2>OPD history</h2>{% include "_visits.html" %}</div>
+<div class="panel"><h2>New OPD entry</h2><form method="post" action="{{ url_for('doctor.add_opd', pid=p.patient_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="grid"><div><label>BP</label><input name="bp" placeholder="120/80"></div><div><label>Pulse</label><input name="pulse" type="number"></div>
+<div><label>Temp °C</label><input name="temperature_c" type="number" step="0.1"></div><div><label>Weight kg</label><input name="weight_kg" type="number" step="0.1"></div></div>
+<label>Complaints</label><textarea name="complaints"></textarea><label>Diagnosis</label><textarea name="diagnosis"></textarea>
+<label>Prescription</label><textarea name="prescription"></textarea><label>Notes</label><textarea name="notes"></textarea>
+<label>Follow-up date</label><input name="follow_up" type="date"><button>Save OPD entry</button></form></div>{% endblock %}

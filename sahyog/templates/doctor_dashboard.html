@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block body %}<div class="grid">
+<div class="panel"><h2>Find patient</h2><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Patient ID (from card)</label><input name="patient_id" placeholder="DS-XXXX-XXXX-X" required><button>Open record</button></form>
+<p class="muted">Every record you open is logged and visible to the patient.</p></div>
+<div class="panel"><h2>Upcoming appointments</h2><table>{% for a in appts %}<tr><td>{{a.slot.replace('T',' ')}}</td><td>{{a.patient.user.name}}</td><td>{{a.reason}}</td>
+<td><a href="{{ url_for('doctor.record', pid=a.patient.patient_id) }}">Open</a></td></tr>{% else %}<tr><td class="muted">None.</td></tr>{% endfor %}</table></div></div>{% endblock %}

@@ -1,0 +1,4 @@
+<table><tr><th>Date</th><th>Doctor</th><th>Vitals</th><th>Complaints</th><th>Diagnosis</th><th>Prescription</th></tr>
+{% for v in p.visits %}<tr><td>{{ v.visit_date.strftime('%d %b %Y') }}</td><td>Dr {{ v.doctor.name }}</td>
+<td>BP {{v.bp}}<br>Pulse {{v.pulse}}<br>{{v.temperature_c}}°C · {{v.weight_kg}} kg</td><td>{{ v.complaints }}</td><td>{{ v.diagnosis }}</td><td>{{ v.prescription }}{% if v.follow_up %}<br><span class="muted">Follow-up {{v.follow_up}}</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">No visits yet.</td></tr>{% endfor %}</table>
