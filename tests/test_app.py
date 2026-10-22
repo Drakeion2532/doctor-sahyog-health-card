@@ -147,3 +147,31 @@ def test_security_headers(client):
     r = client.get("/")
     assert r.headers["X-Frame-Options"] == "DENY"
     assert "default-src 'self'" in r.headers["Content-Security-Policy"]
+
+
+def test_every_genuine_qr_token_verifies(app):
+    """Regression: the signature is raw bytes and may contain b".". Splitting on the
+    separator used to reject ~6% of genuine cards."""
+    from sahyog.security import qr_token, parse_qr_token
+    with app.app_context():
+        for i in range(3000):
+            pid = f"DS-T{i:03d}-ABCD-X"
+            assert parse_qr_token(qr_token(pid, 1)) == (pid, 1)
+        assert parse_qr_token("not-a-token") is None
+        assert parse_qr_token(qr_token("DS-AAAA-BBBB-C", 1)[:-2] + "AA") is None
+
+
+def test_audit_log_is_append_only(app, client):
+    register_patient(client)
+    with app.app_context():
+        db.session.add(AuditLog(actor="x", actor_role="admin", action="test"))
+        db.session.commit()
+        entry = AuditLog.query.first()
+        entry.detail = "tampered"
+        with pytest.raises(PermissionError):
+            db.session.commit()
+        db.session.rollback()
+        with pytest.raises(PermissionError):
+            db.session.delete(AuditLog.query.first())
+            db.session.commit()
+        db.session.rollback()

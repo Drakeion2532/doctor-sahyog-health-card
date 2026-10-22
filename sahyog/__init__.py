@@ -41,6 +41,10 @@ def create_app(test_config: dict | None = None) -> Flask:
     )
     if test_config:
         app.config.update(test_config)
+    if app.config["SECRET_KEY"] == "dev-only-change-me" and not app.testing:
+        # The secret key signs QR codes and sessions: with the default, anyone can forge them.
+        app.logger.warning("SAHYOG_SECRET_KEY is not set; using an insecure development key. "
+                           "Set it before exposing this app to anyone else.")
 
     db.init_app(app)
     csrf.init_app(app)

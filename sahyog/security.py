@@ -65,15 +65,22 @@ def qr_token(patient_id: str, version: int) -> str:
     """HMAC-signed token printed in the QR code. Contains no medical data.
     Bumping `version` (patient clicks 'reissue card') revokes old cards."""
     msg = f"{patient_id}:{version}".encode()
-    sig = hmac.new(current_app.config["SECRET_KEY"].encode(), msg, hashlib.sha256).digest()[:16]
+    sig = hmac.new(current_app.config["SECRET_KEY"].encode(), msg, hashlib.sha256).digest()[:SIG_LEN]
     return base64.urlsafe_b64encode(msg + b"." + sig).decode().rstrip("=")
+
+
+SIG_LEN = 16
 
 
 def parse_qr_token(token: str):
     try:
         raw = base64.urlsafe_b64decode(token + "=" * (-len(token) % 4))
-        msg, sig = raw.rsplit(b".", 1)
-        good = hmac.new(current_app.config["SECRET_KEY"].encode(), msg, hashlib.sha256).digest()[:16]
+        # The signature is raw bytes and can itself contain b".", so split by its fixed
+        # length rather than on the separator (splitting on "." broke ~6% of genuine cards).
+        msg, sep, sig = raw[:-SIG_LEN - 1], raw[-SIG_LEN - 1:-SIG_LEN], raw[-SIG_LEN:]
+        if sep != b"." or len(sig) != SIG_LEN:
+            return None
+        good = hmac.new(current_app.config["SECRET_KEY"].encode(), msg, hashlib.sha256).digest()[:SIG_LEN]
         if not hmac.compare_digest(sig, good):
             return None
         pid, version = msg.decode().split(":")

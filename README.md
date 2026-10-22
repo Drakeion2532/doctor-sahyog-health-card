@@ -1,5 +1,7 @@
 # Doctor Sahyog: QR-Code Digital Health Card
 
+[![tests](https://github.com/Drakeion2532/doctor-sahyog-health-card/actions/workflows/tests.yml/badge.svg)](https://github.com/Drakeion2532/doctor-sahyog-health-card/actions/workflows/tests.yml)
+
 A secure electronic health record (EHR) web app built around a **printable health card** that carries a QR code and a unique Patient ID.
 
 * **Doctors** look up any patient by ID, read the history and record OPD visits.
@@ -59,7 +61,7 @@ In India, especially outside big cities, a patient's history lives in paper file
 | Fake doctors | Doctor accounts have **no record access until an admin verifies** the registration number |
 | Privilege escalation | Role-based access control decorator on every route (patient / doctor / admin) |
 | CSRF / clickjacking / XSS | Flask-WTF CSRF tokens, `X-Frame-Options: DENY`, strict `Content-Security-Policy`, Jinja autoescaping, `HttpOnly` + `SameSite` cookies, `Cache-Control: no-store` |
-| Insider snooping | **Immutable audit log** of every view, scan, edit and failure (actor, role, IP, time). Patients see who opened their record. |
+| Insider snooping | **Append-only audit log** of every view, scan, edit and failure (actor, role, IP, time); the app blocks edits and deletes of log entries. Patients see who opened their record. |
 
 ## Quick start
 
@@ -67,7 +69,7 @@ In India, especially outside big cities, a patient's history lives in paper file
 pip install -r requirements.txt
 python scripts/seed.py          # synthetic demo data (60 patients, ~130 OPD visits)
 python run.py                   # http://127.0.0.1:5000
-pytest -q                       # 12 security + functional tests
+pytest -q                       # 14 security + functional tests
 ```
 
 Demo accounts created by the seed script:
@@ -78,7 +80,7 @@ Demo accounts created by the seed script:
 | Doctor | doctor1@sahyog.local | Doctor@12345 |
 | Admin | admin@sahyog.local | Admin@12345 |
 
-For production, set `SAHYOG_SECRET_KEY`, `SAHYOG_FIELD_KEY` (generate it with `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"`), `SAHYOG_DB` (e.g. a PostgreSQL URL) and `SAHYOG_PUBLIC_URL` (the domain printed in the QR codes). Serve behind HTTPS with gunicorn.
+For production, set `SAHYOG_SECRET_KEY` (it signs the QR codes; the app logs a warning while the insecure default is in use), `SAHYOG_FIELD_KEY` (generate it with `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"`), `SAHYOG_DB` (e.g. a PostgreSQL URL) and `SAHYOG_PUBLIC_URL` (the domain printed in the QR codes). Serve behind HTTPS with gunicorn.
 
 ## Dataset
 

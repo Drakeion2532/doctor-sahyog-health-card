@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .security import encrypt, decrypt
@@ -135,3 +136,10 @@ class AuditLog(db.Model):
     patient_ref = db.Column(db.String(20), index=True)
     ip = db.Column(db.String(45))
     detail = db.Column(db.String(200))
+
+
+@event.listens_for(AuditLog, "before_update")
+@event.listens_for(AuditLog, "before_delete")
+def _audit_log_is_append_only(mapper, connection, target):
+    """The audit trail can be added to but never edited or deleted through the app."""
+    raise PermissionError("audit log entries are append-only")
