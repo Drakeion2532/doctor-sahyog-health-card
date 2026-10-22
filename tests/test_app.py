@@ -175,3 +175,44 @@ def test_audit_log_is_append_only(app, client):
             db.session.delete(AuditLog.query.first())
             db.session.commit()
         db.session.rollback()
+
+
+def test_patient_can_export_record_as_fhir_bundle(app, client):
+    register_patient(client)
+    login(client, "pat@x.io", "Secret123")
+    client.post("/patient/profile", data={"allergies": "Peanuts, Penicillin", "chronic_conditions": "Asthma"})
+    client.get("/logout")
+    with app.app_context():
+        pid = Patient.query.first().patient_id
+    login(client, "doc@x.io", "Doctor12345")
+    client.post(f"/doctor/patient/{pid}/opd", data={"complaints": "fever", "diagnosis": "Viral fever",
+                                                    "prescription": "PCM 500 mg", "pulse": "90", "bp": "120/80"})
+    client.get("/logout")
+    assert client.get("/patient/export/fhir").status_code in (302, 401)       # must be logged in
+    login(client, "doc@x.io", "Doctor12345")
+    assert client.get("/patient/export/fhir").status_code == 403              # doctors can't use it
+    client.get("/logout")
+
+    login(client, "pat@x.io", "Secret123")
+    r = client.get("/patient/export/fhir")
+    assert r.status_code == 200 and r.mimetype == "application/fhir+json"
+    b = r.get_json()
+    assert b["resourceType"] == "Bundle" and b["type"] == "collection"
+    by_type = {}
+    for e in b["entry"]:
+        by_type.setdefault(e["resource"]["resourceType"], []).append(e["resource"])
+    patient = by_type["Patient"][0]
+    assert patient["identifier"][0]["value"] == pid and patient["gender"] == "female" and patient["birthDate"] == "1990-01-01"
+    assert {a["code"]["text"] for a in by_type["AllergyIntolerance"]} == {"Peanuts", "Penicillin"}
+    assert {c["code"]["text"] for c in by_type["Condition"]} == {"Asthma", "Viral fever"}     # decrypted
+    assert by_type["MedicationRequest"][0]["medicationCodeableConcept"]["text"] == "PCM 500 mg"
+    codes = {c["code"] for o in by_type["Observation"] for c in o["code"].get("coding", [])}
+    assert {"882-1", "85354-9", "8867-4"} <= codes                            # blood group, BP, pulse (LOINC)
+    # every reference points at a resource inside the bundle
+    urls = {e["fullUrl"] for e in b["entry"]}
+    refs = re.findall(r'"reference": "([^"]+)"', r.get_data(as_text=True))
+    assert refs and all(ref in urls for ref in refs)
+    from fhir.resources.R4B.bundle import Bundle
+    Bundle.parse_obj(b)                         # validates against the official FHIR R4 (R4B) schema
+    with app.app_context():
+        assert AuditLog.query.filter_by(patient_ref=pid, action="fhir_export").count() == 1

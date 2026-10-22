@@ -54,6 +54,20 @@ def card_png():
                     headers={"Content-Disposition": f"inline; filename={p.patient_id}.png"})
 
 
+@bp.route("/export/fhir")
+@login_required
+@role_required("patient")
+def export_fhir():
+    """The patient downloads their whole record as a FHIR R4 bundle to take to another hospital or app."""
+    import json
+    from ..fhir import patient_bundle
+    p = current_user.patient
+    bundle = patient_bundle(p)
+    log("fhir_export", p.patient_id, f"{len(bundle['entry'])} resources")
+    return Response(json.dumps(bundle, indent=2, ensure_ascii=False), mimetype="application/fhir+json",
+                    headers={"Content-Disposition": f"attachment; filename={p.patient_id}-fhir.json"})
+
+
 @bp.route("/reissue", methods=["POST"])
 @login_required
 @role_required("patient")

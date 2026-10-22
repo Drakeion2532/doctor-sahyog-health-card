@@ -7,3 +7,4 @@ qrcode[pil]>=7.4
 pillow>=10
 faker>=24
 pytest>=7
+fhir.resources>=7,<8

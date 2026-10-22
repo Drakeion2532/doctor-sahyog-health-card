@@ -2,7 +2,8 @@
 <div class="grid"><div class="panel"><h2>My health card</h2><img class="card-img" src="{{ url_for('patient.card_png') }}" alt="health card">
 <p class="muted">Patient ID <b>{{ p.patient_id }}</b> · card v{{ p.card_version }}</p>
 <p class="muted">QR link: <code>{{ card_link }}</code></p>
-<form method="post" action="{{ url_for('patient.reissue') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary">Lost card? Reissue & revoke old QR</button></form></div>
+<form method="post" action="{{ url_for('patient.reissue') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary">Lost card? Reissue & revoke old QR</button></form>
+<p class="muted"><a href="{{ url_for('patient.export_fhir') }}">Download my full record (FHIR R4)</a>: the standard format used by ABDM and most hospital systems, to take your history to another doctor or app.</p></div>
 <div class="panel"><h2>Medical profile</h2><form method="post" action="{{ url_for('patient.update_profile') }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <label>Phone</label><input name="phone" value="{{ p.phone or '' }}"><label>Address</label><input name="address" value="{{ p.address or '' }}">

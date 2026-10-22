@@ -63,13 +63,33 @@ In India, especially outside big cities, a patient's history lives in paper file
 | CSRF / clickjacking / XSS | Flask-WTF CSRF tokens, `X-Frame-Options: DENY`, strict `Content-Security-Policy`, Jinja autoescaping, `HttpOnly` + `SameSite` cookies, `Cache-Control: no-store` |
 | Insider snooping | **Append-only audit log** of every view, scan, edit and failure (actor, role, IP, time); the app blocks edits and deletes of log entries. Patients see who opened their record. |
 
+## Take your record to another hospital (FHIR R4 export)
+
+A health card only helps if the record can travel. India's **Ayushman Bharat Digital Mission (ABDM)** and most hospital systems exchange records as **HL7 FHIR R4**, so a patient can download their whole history in that format from their dashboard (**Download my full record**), or from `GET /patient/export/fhir`.
+
+The bundle contains:
+* **Patient:** with the Doctor Sahyog Patient ID.
+* **Vitals as Observations, with standard LOINC codes:** blood group, and blood pressure, pulse, temperature and weight per visit.
+* **AllergyIntolerance:** one per listed allergy.
+* **Condition:** chronic conditions, plus each visit's diagnosis.
+* **MedicationStatement:** current medications.
+* **Encounter:** one per OPD visit.
+* **MedicationRequest:** each prescription.
+* **Practitioner:** each doctor, with their medical-council registration number.
+
+How it's protected and checked:
+* **Patient only:** only the patient can export (doctors get 403), and every export is written to the audit log.
+* **Schema-validated:** the tests validate each export against the official FHIR R4 schema (via `fhir.resources`, R4B), and check that every internal reference resolves.
+
+To actually share through ABDM it would also need the NRCeS India profiles (e.g. an OPConsultRecord document) and ABHA-linked consent; see the roadmap.
+
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 python scripts/seed.py          # synthetic demo data (60 patients, ~130 OPD visits)
 python run.py                   # http://127.0.0.1:5000
-pytest -q                       # 14 security + functional tests
+pytest -q                       # 15 security + functional tests
 ```
 
 Demo accounts created by the seed script:
@@ -97,6 +117,7 @@ sahyog/
   __init__.py      app factory, security headers
   models.py        User, Patient, OPDVisit, Appointment, AuditLog (+ encrypted-field descriptor)
   security.py      field encryption, signed QR tokens, Patient-ID checksum, PIN lockout, RBAC
+  fhir.py          FHIR R4 export of a patient's record
   card_image.py    printable card renderer
   audit.py         audit logger
   routes/          auth, patient, doctor, card (public QR), admin
@@ -108,7 +129,8 @@ tests/             pytest suite
 ## Roadmap
 
 - [ ] Patient Mitra features from the Figma design: medicine ordering + order tracking, UPI payments, health blog, social login
-- [ ] FHIR R4 export (`Patient`, `Encounter`, `MedicationRequest`) for ABDM / ABHA interoperability
+- [x] FHIR R4 export of the full record (Patient, Encounter, Condition, MedicationRequest, Observation…)
+- [ ] ABDM sharing: NRCeS India FHIR profiles + ABHA consent flow
 - [ ] TOTP two-factor authentication for doctors
 - [ ] Lab-report uploads with malware scanning
 - [ ] Offline-first mobile scanner app for rural clinics
