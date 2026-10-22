@@ -8,7 +8,7 @@ A secure electronic health record (EHR) web app built around a **printable healt
 * **Paramedics** scan the card and see only the emergency information.
 * **Patients** unlock their full history with a PIN and can see **everyone who accessed their data**.
 
-Reference implementation of the research paper **"Doctor Sahyog: Health Card"** by S. Mande, S. Puniwala, P. Gurav, P. Gare, P. Punde, A. Prayag, **S. Punde** (Vishwakarma Institute of Technology, Pune). The follow-up version was published as *Patient Mitra*.
+Reference implementation of the research paper **"Doctor Sahyog: Health Card"** by S. Mande, S. Puniwala, P. Gurav, P. Gare, P. Punde, A. Prayag, **S. Punde** (Vishwakarma Institute of Technology, Pune). The follow-up version was **published** as [*Patient Mitra: Health Card*](https://openurl.ebsco.com/EPDB%3Agcd%3A3%3A2283619/detailv2?sid=ebsco%3Aocu%3Arecord&id=ebsco%3Agcd%3A171360364&bquery=IS%202395-5287%20AND%20VI%209%20AND%20IP%202%20AND%20DT%202023&page=1), GIJET Vol. 9, Issue 2 (2023), ISSN 2395-5287.
 
 | Patient dashboard | QR scan (public emergency view) |
 |---|---|
@@ -20,9 +20,9 @@ Reference implementation of the research paper **"Doctor Sahyog: Health Card"** 
 
 ## Patient Mitra: mobile app design (v2)
 
-**[Open the Patient Mitra design in Figma](https://www.figma.com/design/DWeRImWQq5nykh34RKDdlR/Patient-Mitra?node-id=0-1&p=f&t=kqAm0uMJkZbweJZd-0)**
+**[Open the Patient Mitra design in Figma](https://www.figma.com/design/DWeRImWQq5nykh34RKDdlR/Patient-Mitra?node-id=0-1&t=5mhWr3FTxej1mtFu-1)**
 
-Patient Mitra is the second version of Doctor Sahyog, redesigned as a mobile app. The Figma file has about 115 screens (360 × 800) covering the full patient and doctor journeys:
+Patient Mitra is the second version of Doctor Sahyog, redesigned as a mobile app, and the subject of the published paper above. The Figma file has **115 screens (360 × 800)** covering the full patient and doctor journeys:
 
 | Flow | Screens |
 |---|---|
@@ -31,6 +31,7 @@ Patient Mitra is the second version of Doctor Sahyog, redesigned as a mobile app
 | Appointments | Search by doctor / by hospital, About doctor, Book & request appointment, Confirmation, My appointments |
 | Medicine ordering | Order medicine, Medicine catalogue, Cart, Checkout, Payment (UPI / G-Pay, net banking, card), Order confirmation, Track / cancel order |
 | Doctor | Doctor dashboard & menu, Patient search, Patient medical history, Write prescription and add to the patient's cart |
+| Account & info | My Payment, About Us, Contact Us, Privacy Policy |
 
 This web app already implements the core of that design: patient and doctor portals, QR health card, patient search by ID, OPD history and prescriptions, and appointment booking. Medicine ordering, payments and the health blog are next on the roadmap.
 
