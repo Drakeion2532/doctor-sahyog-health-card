@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use or adapt this work, please credit it as below and keep the copyright notice."
+title: "Doctor Sahyog: Health Card"
+type: software
+authors:
+  - family-names: Punde
+    given-names: Shubhan
+    email: shubhanpunde@gmail.com
+repository-code: "https://github.com/Drakeion2532/doctor-sahyog-health-card"
+license: MIT
+date-released: "2026-11-03"
+identifiers:
+  - type: other
+    value: "sp2532-114d38316204"
+    description: "Project identifier"
+references:
+  - type: generic
+    title: "Doctor Sahyog: Health Card"
+    authors:
+      - name: "S. Mande"
+      - name: "S. Puniwala"
+      - name: "P. Gurav"
+      - name: "P. Gare"
+      - name: "P. Punde"
+      - name: "A. Prayag"
+      - name: "S. Punde"
+    year: 2023
+  - type: article
+    title: "Patient Mitra: Health Card"
+    authors:
+      - name: "S. Punde"
+    journal: "GIJET Vol. 9, Issue 2, ISSN 2395-5287"
+    year: 2023

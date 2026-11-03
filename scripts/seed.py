@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Shubhan Punde · https://github.com/Drakeion2532/doctor-sahyog-health-card · MIT licence · sp2532-114d38316204
 """Seeds the database with a SYNTHETIC demo dataset (no real patients).
 
 Creates: 1 admin, 4 verified doctors, 1 doctor awaiting verification,

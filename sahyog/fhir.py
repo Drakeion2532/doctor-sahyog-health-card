@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Shubhan Punde · https://github.com/Drakeion2532/doctor-sahyog-health-card · MIT licence · sp2532-114d38316204
 """Export a patient's record as a FHIR R4 Bundle, so it can move to another hospital or app.
 
 A health card only helps if the record can travel. India's Ayushman Bharat Digital Mission (ABDM)
