@@ -1,8 +1,8 @@
-# Doctor Sahyog: QR-Code Digital Health Card
+# Doctor Sahyog: Secure-by-Design Health Records (QR Health Card)
 
 [![tests](https://github.com/Drakeion2532/doctor-sahyog-health-card/actions/workflows/tests.yml/badge.svg)](https://github.com/Drakeion2532/doctor-sahyog-health-card/actions/workflows/tests.yml)
 
-A secure electronic health record (EHR) web app built around a **printable health card** that carries a QR code and a unique Patient ID.
+An application-security project: a threat-modelled electronic health record (EHR) web app built around a **printable health card** that carries a QR code and a unique Patient ID. Every control below maps to a STRIDE threat in the [threat model](docs/THREAT_MODEL.md) and to a test that proves it.
 
 * **Doctors** look up any patient by ID, read the history and record OPD visits.
 * **Paramedics** scan the card and see only the emergency information.
@@ -52,6 +52,8 @@ In India, especially outside big cities, a patient's history lives in paper file
 
 ## Security design (cybersecurity focus)
 
+Full STRIDE review with residual risks: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
+
 | Threat | Control |
 |---|---|
 | Database leak | Sensitive fields (allergies, conditions, medications, diagnoses, prescriptions, phone, address) are **encrypted at rest with Fernet (AES-128-CBC + HMAC-SHA256)**. The key comes from an environment variable or secrets manager. |
@@ -61,7 +63,9 @@ In India, especially outside big cities, a patient's history lives in paper file
 | Password attacks | Salted hashes via Werkzeug (scrypt/pbkdf2), a password strength rule, **account lockout** after 5 failures, and one generic error message (**no user enumeration**) |
 | Fake doctors | Doctor accounts have **no record access until an admin verifies** the registration number |
 | Privilege escalation | Role-based access control decorator on every route (patient / doctor / admin) |
-| CSRF / clickjacking / XSS | Flask-WTF CSRF tokens, `X-Frame-Options: DENY`, strict `Content-Security-Policy`, Jinja autoescaping, `HttpOnly` + `SameSite` cookies, `Cache-Control: no-store` |
+| Forged tokens from a public default key | No fixed fallback: without `SAHYOG_SECRET_KEY` the app generates a random per-install key kept out of git |
+| CSRF / clickjacking / XSS | Flask-WTF CSRF tokens, `X-Frame-Options: DENY`, strict `Content-Security-Policy` (`object-src 'none'`, `base-uri`, `form-action`, `frame-ancestors 'none'`), Jinja autoescaping, `HttpOnly` + `SameSite` cookies, `Cache-Control: no-store` |
+| Session theft on HTTPS deployments | `Secure` cookies and HSTS switch on automatically when `SAHYOG_PUBLIC_URL` is `https://` |
 | Insider snooping | **Append-only audit log** of every view, scan, edit and failure (actor, role, IP, time); the app blocks edits and deletes of log entries. Patients see who opened their record. |
 
 ## Take your record to another hospital (FHIR R4 export)
@@ -135,6 +139,10 @@ tests/             pytest suite
 - [ ] TOTP two-factor authentication for doctors
 - [ ] Lab-report uploads with malware scanning
 - [ ] Offline-first mobile scanner app for rural clinics
+
+## Security checks
+
+CI runs `bandit` and `pip-audit` on every push and weekly; see [SECURITY.md](SECURITY.md).
 
 ## How this was built
 

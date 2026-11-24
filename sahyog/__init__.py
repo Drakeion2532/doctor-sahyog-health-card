@@ -24,6 +24,20 @@ def _dev_key(instance: str) -> str:
     Path(instance).mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(generate_key())
+        path.chmod(0o600)
+    return path.read_text().strip()
+
+
+def _dev_secret(instance: str) -> str:
+    """For local runs only: a random signing key persisted in instance/ (git-ignored).
+    Never a fixed default: a key published in the repo would let anyone forge QR tokens
+    and sessions. In production set SAHYOG_SECRET_KEY from a secrets manager."""
+    import secrets
+    path = Path(instance) / "secret.key"
+    Path(instance).mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        path.write_text(secrets.token_urlsafe(48))
+        path.chmod(0o600)
     return path.read_text().strip()
 
 
@@ -31,7 +45,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     app.config.update(
-        SECRET_KEY=os.environ.get("SAHYOG_SECRET_KEY", "dev-only-change-me"),
+        SECRET_KEY=os.environ.get("SAHYOG_SECRET_KEY"),
         FIELD_ENCRYPTION_KEY=os.environ.get("SAHYOG_FIELD_KEY") or _dev_key(app.instance_path),
         SQLALCHEMY_DATABASE_URI=os.environ.get(
             "SAHYOG_DB", "sqlite:///" + str(Path(app.instance_path) / "sahyog.db")),
@@ -42,10 +56,13 @@ def create_app(test_config: dict | None = None) -> Flask:
     )
     if test_config:
         app.config.update(test_config)
-    if app.config["SECRET_KEY"] == "dev-only-change-me" and not app.testing:
-        # The secret key signs QR codes and sessions: with the default, anyone can forge them.
-        app.logger.warning("SAHYOG_SECRET_KEY is not set; using an insecure development key. "
-                           "Set it before exposing this app to anyone else.")
+    if not app.config.get("SECRET_KEY"):
+        # The secret key signs QR codes and sessions, so it must never be a public default.
+        app.config["SECRET_KEY"] = _dev_secret(app.instance_path)
+        app.logger.warning("SAHYOG_SECRET_KEY is not set; using a random local key from instance/secret.key. "
+                           "Set SAHYOG_SECRET_KEY before deploying.")
+    https = app.config["PUBLIC_BASE_URL"].startswith("https://")
+    app.config["SESSION_COOKIE_SECURE"] = https
 
     db.init_app(app)
     csrf.init_app(app)
@@ -60,7 +77,12 @@ def create_app(test_config: dict | None = None) -> Flask:
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["X-Frame-Options"] = "DENY"
         resp.headers["Referrer-Policy"] = "no-referrer"
-        resp.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data:; style-src 'self'"
+        resp.headers["Content-Security-Policy"] = ("default-src 'self'; img-src 'self' data:; style-src 'self'; "
+                                                   "object-src 'none'; base-uri 'self'; form-action 'self'; "
+                                                   "frame-ancestors 'none'")
+        resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if https:
+            resp.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
         resp.headers["Cache-Control"] = "no-store"
         return resp
 

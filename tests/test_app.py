@@ -217,3 +217,33 @@ def test_patient_can_export_record_as_fhir_bundle(app, client):
     Bundle.parse_obj(b)                         # validates against the official FHIR R4 (R4B) schema
     with app.app_context():
         assert AuditLog.query.filter_by(patient_ref=pid, action="fhir_export").count() == 1
+
+
+def test_hardened_csp_and_permissions_policy(client):
+    r = client.get("/")
+    csp = r.headers["Content-Security-Policy"]
+    for directive in ("object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'"):
+        assert directive in csp
+    assert "camera=()" in r.headers["Permissions-Policy"]
+    assert "Strict-Transport-Security" not in r.headers        # plain-http dev URL: no HSTS
+
+
+def test_no_public_default_signing_key(tmp_path, monkeypatch):
+    """Without SAHYOG_SECRET_KEY the app generates a random local key instead of a fixed one."""
+    monkeypatch.delenv("SAHYOG_SECRET_KEY", raising=False)
+    cfg = {"TESTING": True, "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path}/a.db",
+           "FIELD_ENCRYPTION_KEY": generate_key()}
+    a = create_app(cfg)
+    b = create_app(cfg)
+    key = a.config["SECRET_KEY"]
+    assert key and key != "dev-only-change-me" and len(key) >= 40
+    assert b.config["SECRET_KEY"] == key                       # persisted, so QR cards survive restarts
+
+
+def test_https_deployment_sets_secure_cookie_and_hsts(tmp_path):
+    a = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False,
+                    "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path}/h.db",
+                    "FIELD_ENCRYPTION_KEY": generate_key(), "SECRET_KEY": "test",
+                    "PUBLIC_BASE_URL": "https://sahyog.example"})
+    assert a.config["SESSION_COOKIE_SECURE"] is True
+    assert "max-age" in a.test_client().get("/").headers["Strict-Transport-Security"]
