@@ -9,10 +9,6 @@ authors:
 repository-code: "https://github.com/Drakeion2532/doctor-sahyog-health-card"
 license: MIT
 date-released: "2026-11-03"
-identifiers:
-  - type: other
-    value: "sp2532-114d38316204"
-    description: "Project identifier"
 references:
   - type: generic
     title: "Doctor Sahyog: Health Card"

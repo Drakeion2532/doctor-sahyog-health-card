@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Shubhan Punde · https://github.com/Drakeion2532/doctor-sahyog-health-card · MIT licence · sp2532-114d38316204
+# Copyright (c) 2026 Shubhan Punde · MIT licence
 """Renders the printable health card (CR-80 ratio) with the QR code."""
 from __future__ import annotations
 

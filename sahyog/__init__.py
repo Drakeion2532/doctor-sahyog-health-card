@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Shubhan Punde · https://github.com/Drakeion2532/doctor-sahyog-health-card · MIT licence · sp2532-114d38316204
+# Copyright (c) 2026 Shubhan Punde · MIT licence
 """Doctor Sahyog – QR-code based digital health card."""
 from __future__ import annotations
 
@@ -74,4 +74,3 @@ def load_user(uid):
     return db.session.get(User, int(uid))
 
 __author__ = "Shubhan Punde"
-__provenance__ = "sp2532-114d38316204"
